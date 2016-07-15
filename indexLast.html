@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<title>jQuery Excercise</title>
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<style>
+form{
+margin-top: 50px;
+border: 2px;
+border-style: double;
+background-color: #e3e3e3;
+padding-left: 170px;
+}
+.form-group{
+padding: 10px;
+}
+#table{
+max-height: 500px;
+max-width: 500px;
+overflow: auto;
+}
+.container-fluid{
+margin-top: 20px;
+}
+svg{
+background-color: white;
+margin-left: auto;
+margin-right: auto;
+display: block;
+}
+.axis path, .axis line{
+fill :none;
+stroke : #000;
+shape-rendering : crishpEdges;
+}
+h1{
+font-family:sans-serif;
+
+text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="container-fluid ">
+<h1>Dynamic Barchart</h1>
+</div><!--end container-fluid-->
+<div class="container-fluid">
+<div class="col-lg-6" id = "table">
+</div>
+<div class="col-lg-6" id = "json">
+</div>
+</div><!--end container-->
+<div class="container">
+<div class="cols-lg-12">
+<form class="form-inline">
+<div class="form-group">
+<input type="number" class="form-control" name="year" id="yearData" placeholder="Enter Year" required = "required">
+</div>
+<div class="form-group">
+<input type="number" class="form-control" name="male" id="maleData" placeholder="Enter Male Value" required = "required">
+</div>
+<div class="form-group">
+<input type="number" class="form-control" name="female" id="femaleData" placeholder="Enter female value" required = "required">
+</div>
+<div class="form-group">
+<button class="btn btn-success btn-lg btn-block" type = "submit" value = 'submit' id='submit'>Submit</button>
+</div>
+</form>
+</div><!--end cols-lg-12-->
+</div><!--end container-->
+<script type="text/javascript">
+var arr = [];
+$.getJSON('firstOut.json',function(datas){//getting json data
+arr = datas;
+var i;
+var output = '<table class = "table table-striped">';
+output += '<tr><th>Year</th><th>Male Value</th><th>Female Value</th></tr>';
+for (i=0;i<arr.length;i++){
+output += "<tr><td>" + arr[i].year +"</td><td>" + Math.round(arr[i].male) + "</td><td>" + Math.round(arr[i].female) + '</td><td><button class="btn btn-danger" >Delete</button></td></tr>';
+}
+output += "</table>";
+$(output).appendTo('#table'); // json data appending to table
+}).promise(arr);
+arr.done(function(){
+$('#submit').on('click',function(e){//Adding new values to table
+e.preventDefault();
+var year = $('#yearData').val();
+var mdata = $('form').find('#maleData').val();
+var fdata = $('form').find('#femaleData').val();
+if(year==''||mdata==''||fdata=='')
+{
+alert('please enter the values');
+}
+else
+{ var status = true;
+for(var i=0;i<arr.length;i++){
+if(arr[i].year==year){
+alert(year+' is already stated in graph');
+status = false;
+}
+}
+if(status){
+var obj = {year:year,male:mdata,female:fdata};
+arr.push(obj);
+$('table tbody').append('<tr><td>'+year+'</td><td>'+mdata+'</td><td>'+fdata+'</td><td><button class="btn btn-danger" >delete</button></td></tr>');
+$('#json').empty();
+$.getScript('finalBarchart.js',function(){
+data1(arr);
+console.log(arr);
+})
+}
+}
+})
+$('#table').on('click','.btn-danger',function(){//Removing the data from table
+var j = $(this).closest('tr').index();
+arr.splice(j-1,1);
+console.log(arr.length);
+$(this).closest('tr').remove();
+$('#json').empty();
+$.getScript('finalBarchart.js',function(){
+data1(arr);
+console.log(arr);
+})
+})
+})
+</script>
+</body>
+</html>
